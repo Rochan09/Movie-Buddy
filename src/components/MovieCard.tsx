@@ -40,12 +40,16 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, showStreamingHint =
           <div className="flex items-center justify-between text-sm text-gray-400">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              <span>{new Date(movie.release_date).getFullYear()}</span>
+              <span>{movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}</span>
             </div>
             
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span>{movie.vote_average.toFixed(1)}</span>
+              <span>
+                {typeof movie.vote_average === 'number'
+                  ? movie.vote_average.toFixed(1)
+                  : 'N/A'}
+              </span>
             </div>
           </div>
           

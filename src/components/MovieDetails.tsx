@@ -87,7 +87,7 @@ export const MovieDetails: React.FC = () => {
         <div className="relative z-10 pt-8 pb-16">
           <div className="max-w-7xl mx-auto px-6">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200 mb-8"
             >
               <ArrowLeft className="w-5 h-5" />

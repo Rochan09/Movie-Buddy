@@ -9,6 +9,31 @@ export const getImageUrl = (path: string | null): string => {
   return `${IMAGE_BASE_URL}${path}`;
 };
 
+export const fetchGenres = async () => {
+  const response = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch genres');
+  }
+  const data = await response.json();
+  return data.genres;
+};
+
+export const discoverMovies = async (
+  filters: { [key: string]: string | number },
+  page: number = 1
+) => {
+  const params = new URLSearchParams({
+    api_key: API_KEY,
+    page: String(page),
+    ...Object.fromEntries(Object.entries(filters).map(([key, value]) => [key, String(value)])),
+  });
+  const response = await fetch(`${BASE_URL}/discover/movie?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error('Failed to discover movies');
+  }
+  return response.json();
+};
+
 export const fetchTrendingMovies = async () => {
   const response = await fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`);
   if (!response.ok) {
@@ -17,11 +42,13 @@ export const fetchTrendingMovies = async () => {
   return response.json();
 };
 
-export const searchMovies = async (query: string) => {
-  if (!query.trim()) return { results: [] };
-  
+export const searchMovies = async (query: string, page: number = 1) => {
+  if (!query.trim()) return { results: [], total_pages: 1 };
+
   const response = await fetch(
-    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
+    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
+      query
+    )}&page=${page}`
   );
   if (!response.ok) {
     throw new Error('Failed to search movies');
