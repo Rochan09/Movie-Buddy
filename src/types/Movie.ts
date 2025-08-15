@@ -1,3 +1,20 @@
+export interface Person {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department: string;
+  biography?: string;
+  birthday?: string;
+  deathday?: string | null;
+  place_of_birth?: string;
+  popularity: number;
+  known_for: Movie[];
+}
+
+export interface PersonMovieCredits {
+  cast: Movie[];
+  crew: Movie[];
+}
 export interface Movie {
   id: number;
   title: string;

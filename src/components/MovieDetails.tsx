@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Clock, Calendar } from 'lucide-react';
+import { isMovieInWatchlist, addMovieToWatchlist, removeMovieFromWatchlist } from '../services/watchlist';
 import { MovieDetails as MovieDetailsType, Movie, WatchProvidersResponse } from '../types/Movie';
 import { fetchMovieDetails, fetchMovieRecommendations, fetchWatchProviders, getImageUrl } from '../services/tmdbApi';
 import { Loading } from './Loading';
@@ -14,6 +15,7 @@ export const MovieDetails: React.FC = () => {
   const [recommendations, setRecommendations] = useState<Movie[]>([]);
   const [watchProviders, setWatchProviders] = useState<WatchProvidersResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [inWatchlist, setInWatchlist] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,6 +44,22 @@ export const MovieDetails: React.FC = () => {
 
     loadMovieData();
   }, [id]);
+  useEffect(() => {
+    if (movie) {
+      setInWatchlist(isMovieInWatchlist(movie.id));
+    }
+  }, [movie]);
+
+  const handleWatchlistClick = () => {
+    if (!movie) return;
+    if (inWatchlist) {
+      removeMovieFromWatchlist(movie.id);
+      setInWatchlist(false);
+    } else {
+      addMovieToWatchlist(movie);
+      setInWatchlist(true);
+    }
+  };
 
   if (loading) {
     return (
@@ -150,6 +168,12 @@ export const MovieDetails: React.FC = () => {
                   <p className="text-gray-300 leading-relaxed text-lg">
                     {movie.overview}
                   </p>
+                  <button
+                    onClick={handleWatchlistClick}
+                    className={`mt-6 px-4 py-2 rounded-full font-semibold transition-colors ${inWatchlist ? 'bg-red-500 text-white' : 'bg-purple-500 text-white hover:bg-purple-600'}`}
+                  >
+                    {inWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                  </button>
                 </div>
               </div>
             </div>

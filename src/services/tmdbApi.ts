@@ -1,3 +1,32 @@
+// Search for people (actors/actresses) by name
+export const searchPeople = async (query: string, page: number = 1) => {
+  if (!query.trim()) return { results: [], total_pages: 1 };
+  const response = await fetch(
+    `${BASE_URL}/search/person?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+  );
+  if (!response.ok) {
+    throw new Error('Failed to search people');
+  }
+  return response.json();
+};
+
+// Fetch person details by ID
+export const fetchPersonDetails = async (personId: string) => {
+  const response = await fetch(`${BASE_URL}/person/${personId}?api_key=${API_KEY}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch person details');
+  }
+  return response.json();
+};
+
+// Fetch movies for a person (actor/actress) by ID
+export const fetchPersonMovieCredits = async (personId: string) => {
+  const response = await fetch(`${BASE_URL}/person/${personId}/movie_credits?api_key=${API_KEY}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch person movie credits');
+  }
+  return response.json();
+};
 // You'll need to get your API key from https://developer.themoviedb.org
 // Replace 'YOUR_API_KEY' with your actual TMDB API key
 const API_KEY = '4520b9b687903fccc82ce7becd770e93';

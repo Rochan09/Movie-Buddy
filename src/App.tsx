@@ -3,22 +3,45 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Film } from 'lucide-react';
 import { HomePage } from './components/HomePage';
 import { MovieDetails } from './components/MovieDetails';
+import { PersonDetails } from './components/PersonDetails';
+import { Watchlist } from './components/Watchlist';
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-900">
         {/* Header */}
-        <header className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+  <header className="bg-gradient-to-r from-purple-400 via-pink-300 to-yellow-300 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-6 py-4 relative">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-600 rounded-lg">
+              <div className="p-2 bg-purple-800 rounded-lg">
                 <Film className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-white">
-                Movie<span className="text-purple-400">Buddy</span>
+              <h1 className="text-2xl font-bold">
+                <span className="text-white">Movie</span><span className="text-purple-900 font-extrabold">Buddy</span>
               </h1>
+              {/* Watchlist and Home buttons at top right */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 flex gap-3">
+                <a
+                  href="/watchlist"
+                  className="px-4 py-2 rounded-full bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
+                >
+                  Watchlist
+                </a>
+                <a
+                  href="/"
+                  className="px-4 py-2 rounded-full bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
+                >
+                  Home
+                </a>
+              </div>
             </div>
+            <a
+              href="/"
+              className="absolute right-0 top-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
+            >
+              Home
+            </a>
           </div>
         </header>
 
@@ -27,6 +50,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/movie/:id" element={<MovieDetails />} />
+            <Route path="/person/:id" element={<PersonDetails />} />
+            <Route path="/watchlist" element={<Watchlist />} />
           </Routes>
         </main>
 

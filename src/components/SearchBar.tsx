@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
-import { Movie } from '../types/Movie';
-import { searchMovies } from '../services/tmdbApi';
+import { Movie, Person } from '../types/Movie';
+import { searchMovies, searchPeople } from '../services/tmdbApi';
 import { SearchSuggestions } from './SearchSuggestions';
 
 interface SearchBarProps {
@@ -18,7 +18,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState(initialQuery);
-  const [suggestions, setSuggestions] = useState<Movie[]>([]);
+  const [movieSuggestions, setMovieSuggestions] = useState<Movie[]>([]);
+  const [personSuggestions, setPersonSuggestions] = useState<Person[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
@@ -50,10 +51,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
     debounceTimeout.current = setTimeout(async () => {
       if (newQuery.trim()) {
-        const data = await searchMovies(newQuery);
-        setSuggestions(data.results.slice(0, 5));
+        const [movieData, personData] = await Promise.all([
+          searchMovies(newQuery),
+          searchPeople(newQuery),
+        ]);
+        setMovieSuggestions(movieData.results.slice(0, 5));
+        setPersonSuggestions(personData.results.slice(0, 5));
       } else {
-        setSuggestions([]);
+        setMovieSuggestions([]);
+        setPersonSuggestions([]);
       }
       onSearch(newQuery);
     }, 300);
@@ -61,16 +67,26 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   const handleClear = () => {
     setQuery('');
-    setSuggestions([]);
+    setMovieSuggestions([]);
+    setPersonSuggestions([]);
     setShowSuggestions(false);
     onSearch('');
   };
 
-  const handleSuggestionClick = (movie: Movie) => {
+  const handleMovieSuggestionClick = (movie: Movie) => {
     setQuery(movie.title);
-    setSuggestions([]);
+    setMovieSuggestions([]);
+    setPersonSuggestions([]);
     setShowSuggestions(false);
     navigate(`/movie/${movie.id}`);
+  };
+
+  const handlePersonSuggestionClick = (person: Person) => {
+    setQuery(person.name);
+    setMovieSuggestions([]);
+    setPersonSuggestions([]);
+    setShowSuggestions(false);
+    navigate(`/person/${person.id}`);
   };
 
   return (
@@ -96,8 +112,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       </div>
       {showSuggestions && (
         <SearchSuggestions
-          suggestions={suggestions}
-          onSuggestionClick={handleSuggestionClick}
+          movieSuggestions={movieSuggestions}
+          personSuggestions={personSuggestions}
+          onMovieSuggestionClick={handleMovieSuggestionClick}
+          onPersonSuggestionClick={handlePersonSuggestionClick}
         />
       )}
     </div>
