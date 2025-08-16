@@ -43,6 +43,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
+    onSearch(newQuery);
     setShowSuggestions(true);
 
     if (debounceTimeout.current) {
@@ -61,7 +62,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         setMovieSuggestions([]);
         setPersonSuggestions([]);
       }
-      onSearch(newQuery);
     }, 300);
   };
 
