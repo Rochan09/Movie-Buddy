@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SearchBar } from './SearchBar';
 import { MovieGrid } from './MovieGrid';
-import { Loading, LoadingGrid } from './Loading';
+import { LoadingGrid } from './Loading';
 import { Movie } from '../types/Movie';
 import { discoverMovies, fetchGenres, searchMovies } from '../services/tmdbApi';
 import { FilterControls } from './FilterControls';
-import { Pagination } from './Pagination';
+import { LoadMore } from './LoadMore';
 
 interface Genre {
   id: number;
@@ -20,12 +20,13 @@ export const HomePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedGenre = searchParams.get('genre') || '';
   const selectedYear = searchParams.get('year') || '';
   const selectedSort = searchParams.get('sort') || 'popularity.desc';
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  // const currentPage = parseInt(searchParams.get('page') || '1', 10); // No longer used
   const searchQuery = searchParams.get('search') || '';
 
   const updateSearchParams = (newParams: { [key: string]: string | number | null }) => {
@@ -63,14 +64,14 @@ export const HomePage: React.FC = () => {
         setSearching(true);
         let data;
         if (searchQuery) {
-          data = await searchMovies(searchQuery, currentPage);
+          data = await searchMovies(searchQuery, 1);
         } else {
           const filters: { [key: string]: string | number } = {
             sort_by: selectedSort,
           };
           if (selectedGenre) filters.with_genres = selectedGenre;
           if (selectedYear) filters.primary_release_year = selectedYear;
-          data = await discoverMovies(filters, currentPage);
+          data = await discoverMovies(filters, 1);
         }
         setMovies(data.results || []);
         setTotalPages(data.total_pages || 1);
@@ -80,11 +81,43 @@ export const HomePage: React.FC = () => {
         setSearching(false);
       }
     };
-
     if (!loading) {
       loadMovies();
     }
-  }, [selectedGenre, selectedYear, selectedSort, currentPage, searchQuery, loading]);
+  }, [selectedGenre, selectedYear, selectedSort, searchQuery, loading]);
+
+  // Track current page for Load More
+  const [loadMorePage, setLoadMorePage] = useState(1);
+
+  // Reset page when filters/search change
+  useEffect(() => {
+    setLoadMorePage(1);
+  }, [selectedGenre, selectedYear, selectedSort, searchQuery]);
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = loadMorePage + 1;
+      let data;
+      if (searchQuery) {
+        data = await searchMovies(searchQuery, nextPage);
+      } else {
+        const filters: { [key: string]: string | number } = {
+          sort_by: selectedSort,
+        };
+        if (selectedGenre) filters.with_genres = selectedGenre;
+        if (selectedYear) filters.primary_release_year = selectedYear;
+        data = await discoverMovies(filters, nextPage);
+      }
+      setMovies((prev) => [...prev, ...(data.results || [])]);
+      setLoadMorePage(nextPage);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load more movies');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleSearch = useCallback((query: string) => {
     if (query !== searchQuery) {
@@ -94,10 +127,10 @@ export const HomePage: React.FC = () => {
     }
   }, [searchQuery]);
 
-  const handlePageChange = (page: number) => {
-    updateSearchParams({ page });
-    window.scrollTo(0, 0);
-  };
+  // const handlePageChange = (page: number) => {
+  //   updateSearchParams({ page });
+  //   window.scrollTo(0, 0);
+  // };
 
   const getTitle = () => {
     if (searchQuery) {
@@ -153,10 +186,10 @@ export const HomePage: React.FC = () => {
         ) : (
           <>
             <MovieGrid movies={movies} title={getTitle()} />
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+            <LoadMore
+              onLoadMore={handleLoadMore}
+              isLoading={isLoadingMore}
+              hasMore={loadMorePage < totalPages}
             />
           </>
         )}

@@ -5,6 +5,9 @@ import { HomePage } from './components/HomePage';
 import { MovieDetails } from './components/MovieDetails';
 import { PersonDetails } from './components/PersonDetails';
 import { Watchlist } from './components/Watchlist';
+import { About } from './components/About';
+import { NavButton } from './components/NavButton';
+import { MobileNav } from './components/MobileNav';
 
 function App() {
   return (
@@ -20,28 +23,18 @@ function App() {
               <h1 className="text-2xl font-bold">
                 <span className="text-white">Movie</span><span className="text-purple-900 font-extrabold">Buddy</span>
               </h1>
-              {/* Watchlist and Home buttons at top right */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 flex gap-3">
-                <a
-                  href="/watchlist"
-                  className="px-4 py-2 rounded-full bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
-                >
-                  Watchlist
-                </a>
-                <a
-                  href="/"
-                  className="px-4 py-2 rounded-full bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
-                >
-                  Home
-                </a>
+              {/* Desktop nav */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 gap-3 hidden md:flex">
+                <NavButton href="/" label="Home" />
+                <NavButton href="/watchlist" label="Watchlist" />
+                <NavButton href="/about" label="About" />
+              </div>
+              {/* Mobile nav */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 flex md:hidden">
+                <MobileNav order={["Home", "Watchlist", "About"]} />
               </div>
             </div>
-            <a
-              href="/"
-              className="absolute right-0 top-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
-            >
-              Home
-            </a>
+            {/* Removed duplicate Home button */}
           </div>
         </header>
 
@@ -52,6 +45,7 @@ function App() {
             <Route path="/movie/:id" element={<MovieDetails />} />
             <Route path="/person/:id" element={<PersonDetails />} />
             <Route path="/watchlist" element={<Watchlist />} />
+            <Route path="/about" element={<About />} />
           </Routes>
         </main>
 

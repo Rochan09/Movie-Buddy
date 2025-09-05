@@ -31,7 +31,7 @@ export const fetchPersonMovieCredits = async (personId: string) => {
 // Replace 'YOUR_API_KEY' with your actual TMDB API key
 const API_KEY = '4520b9b687903fccc82ce7becd770e93';
 const BASE_URL = 'https://api.themoviedb.org/3';
-const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
 
 export const getImageUrl = (path: string | null): string => {
   if (!path) return '/placeholder-movie.jpg';

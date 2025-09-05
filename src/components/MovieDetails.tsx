@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, Clock, Calendar } from 'lucide-react';
+import { ArrowLeft, Star, Clock, Calendar, Heart } from 'lucide-react';
 import { isMovieInWatchlist, addMovieToWatchlist, removeMovieFromWatchlist } from '../services/watchlist';
 import { MovieDetails as MovieDetailsType, Movie, WatchProvidersResponse } from '../types/Movie';
 import { fetchMovieDetails, fetchMovieRecommendations, fetchWatchProviders, getImageUrl } from '../services/tmdbApi';
@@ -170,8 +170,9 @@ export const MovieDetails: React.FC = () => {
                   </p>
                   <button
                     onClick={handleWatchlistClick}
-                    className={`mt-6 px-4 py-2 rounded-full font-semibold transition-colors ${inWatchlist ? 'bg-red-500 text-white' : 'bg-purple-500 text-white hover:bg-purple-600'}`}
+                    className={`mt-6 px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition-colors ${inWatchlist ? 'bg-red-500 text-white' : 'bg-purple-500 text-white hover:bg-purple-600'}`}
                   >
+                    <Heart className={`w-5 h-5 ${inWatchlist ? 'fill-white' : 'fill-none'} mr-1`} fill={inWatchlist ? 'white' : 'none'} />
                     {inWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
                   </button>
                 </div>
