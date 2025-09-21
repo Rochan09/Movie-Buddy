@@ -64,9 +64,10 @@ function App() {
                   The Movie Database (TMDB)
                 </a>
               </p>
-              <p className="text-sm">
-                Built with React, TypeScript, and Tailwind CSS
-              </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Built with React, TypeScript, and Tailwind CSS
+                </p>
+                <p className="text-xs text-gray-500 mt-2">© 2024-2025 Rochan Vardhan Boddepalli. All rights reserved.</p>
             </div>
           </div>
         </footer>
