@@ -2,6 +2,18 @@
 
 Movie Buddy is a web application that helps users discover movies and view detailed information about them. It features a modern UI built with React and TypeScript, styled using Tailwind CSS, and leverages the TMDB API for movie data.
 
+**Note: Use VPN for optimal access to movie streaming platforms and content availability.**
+
+## 📸 Preview
+
+![Movie Buddy Preview](./public/MovieBuddy%20Thumbnail.png)
+
+## 🌐 Live Demo
+
+🚀 **[View Live Demo](https://your-movie-buddy-demo.vercel.app)** 
+
+*Try out Movie Buddy live! Search for your favorite movies, explore trending films, and discover new ones to watch.*
+
 ## ✨ Features
 
 - 🔍 Search for movies by title
