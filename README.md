@@ -12,7 +12,9 @@ Movie Buddy is a web application that helps users discover movies and view detai
 
 🚀 **[View Live Demo](https://your-movie-buddy-demo.vercel.app)** 
 
-*Try out Movie Buddy live! Search for your favorite movies, explore trending films, and discover new ones to watch.*
+Try out Movie Buddy live! Search for your favorite movies, explore trending films, and discover new ones to watch.
+
+🔒 **Note:** If the demo is not accessible in your region, consider using a VPN.
 
 ## ✨ Features
 
