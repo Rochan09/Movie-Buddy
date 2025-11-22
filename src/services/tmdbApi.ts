@@ -1,10 +1,17 @@
 import { mockMovies, mockGenres, mockMovieDetails } from './mockData';
 
-// Using different CORS proxy to bypass network restrictions
-const CORS_PROXY = 'https://corsproxy.io/?';
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const API_KEY = '4520b9b687903fccc82ce7becd770e93';
-const BASE_URL = `${CORS_PROXY}${TMDB_BASE_URL}`;
+// Configurable via Vite env variables:
+// - VITE_TMDB_API_KEY: your TMDB API key
+// - VITE_CORS_PROXY: optional CORS proxy prefix (e.g. "https://corsproxy.io/?")
+// - VITE_TMDB_BASE_URL: override TMDB base URL (defaults to production)
+// - VITE_USE_LOCAL_PROXY: when set to "true" in dev, use the Vite dev proxy at `/api`
+const CORS_PROXY = import.meta.env.VITE_CORS_PROXY || '';
+const TMDB_BASE_URL = import.meta.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3';
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY || '4520b9b687903fccc82ce7becd770e93';
+// In dev you can set VITE_USE_LOCAL_PROXY=true to route requests through the Vite dev server at `/api`.
+const BASE_URL = import.meta.env.DEV
+  ? (import.meta.env.VITE_USE_LOCAL_PROXY === 'true' ? '/api' : `${CORS_PROXY}${TMDB_BASE_URL}`)
+  : `${CORS_PROXY}${TMDB_BASE_URL}`;
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
 
 // Helper function to make API calls with fallback to mock data
