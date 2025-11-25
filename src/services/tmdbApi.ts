@@ -109,3 +109,10 @@ export const fetchPersonMovieCredits = async (personId: string) => {
   const fallbackData = { cast: [], crew: [] };
   return await fetchWithFallback(url, fallbackData);
 };
+
+// Fetch cast and crew for a movie
+export const fetchMovieCredits = async (movieId: string) => {
+  const url = `${BASE_URL}/movie/${movieId}/credits?api_key=${API_KEY}`;
+  const fallbackData = { cast: [], crew: [] };
+  return await fetchWithFallback(url, fallbackData);
+};

@@ -6,6 +6,7 @@ import { MovieDetails } from './components/MovieDetails';
 import { PersonDetails } from './components/PersonDetails';
 import { Watchlist } from './components/Watchlist';
 import { About } from './components/About';
+import { MoodPicks } from './components/MoodPicks';
 import { NavButton } from './components/NavButton';
 import { MobileNav } from './components/MobileNav';
 
@@ -26,12 +27,13 @@ function App() {
               {/* Desktop nav */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2 gap-3 hidden md:flex">
                 <NavButton href="/" label="Home" />
+                <NavButton href="/mood-picks" label="Mood Picks" />
                 <NavButton href="/watchlist" label="Watchlist" />
                 <NavButton href="/about" label="About" />
               </div>
               {/* Mobile nav */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2 flex md:hidden">
-                <MobileNav order={["Home", "Watchlist", "About"]} />
+                <MobileNav order={["Home", "Mood Picks", "Watchlist", "About"]} />
               </div>
             </div>
             {/* Removed duplicate Home button */}
@@ -42,6 +44,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/mood-picks" element={<MoodPicks />} />
             <Route path="/movie/:id" element={<MovieDetails />} />
             <Route path="/person/:id" element={<PersonDetails />} />
             <Route path="/watchlist" element={<Watchlist />} />

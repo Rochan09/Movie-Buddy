@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { TrendingUp } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 import { MovieGrid } from './MovieGrid';
 import { LoadingGrid } from './Loading';
 import { Movie } from '../types/Movie';
-import { discoverMovies, fetchGenres, searchMovies } from '../services/tmdbApi';
+import { discoverMovies, fetchGenres, searchMovies, fetchTrendingMovies } from '../services/tmdbApi';
 import { FilterControls } from './FilterControls';
 import { LoadMore } from './LoadMore';
 
@@ -15,6 +16,7 @@ interface Genre {
 
 export const HomePage: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,7 @@ export const HomePage: React.FC = () => {
   const selectedGenre = searchParams.get('genre') || '';
   const selectedYear = searchParams.get('year') || '';
   const selectedSort = searchParams.get('sort') || 'popularity.desc';
+  const selectedLanguage = searchParams.get('language') || '';
   // const currentPage = parseInt(searchParams.get('page') || '1', 10); // No longer used
   const searchQuery = searchParams.get('search') || '';
 
@@ -47,8 +50,12 @@ export const HomePage: React.FC = () => {
     const loadGenres = async () => {
       try {
         setLoading(true);
-        const genresData = await fetchGenres();
+        const [genresData, trendingData] = await Promise.all([
+          fetchGenres(),
+          fetchTrendingMovies()
+        ]);
         setGenres(genresData || []);
+        setTrendingMovies(trendingData.results.slice(0, 10) || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load genres');
       } finally {
@@ -71,6 +78,7 @@ export const HomePage: React.FC = () => {
           };
           if (selectedGenre) filters.with_genres = selectedGenre;
           if (selectedYear) filters.primary_release_year = selectedYear;
+          if (selectedLanguage) filters.with_original_language = selectedLanguage;
           data = await discoverMovies(filters, 1);
         }
         setMovies(data.results || []);
@@ -84,7 +92,7 @@ export const HomePage: React.FC = () => {
     if (!loading) {
       loadMovies();
     }
-  }, [selectedGenre, selectedYear, selectedSort, searchQuery, loading]);
+  }, [selectedGenre, selectedYear, selectedSort, selectedLanguage, searchQuery, loading]);
 
   // Track current page for Load More
   const [loadMorePage, setLoadMorePage] = useState(1);
@@ -92,7 +100,7 @@ export const HomePage: React.FC = () => {
   // Reset page when filters/search change
   useEffect(() => {
     setLoadMorePage(1);
-  }, [selectedGenre, selectedYear, selectedSort, searchQuery]);
+  }, [selectedGenre, selectedYear, selectedSort, selectedLanguage, searchQuery]);
 
   const handleLoadMore = async () => {
     if (isLoadingMore) return;
@@ -108,6 +116,7 @@ export const HomePage: React.FC = () => {
         };
         if (selectedGenre) filters.with_genres = selectedGenre;
         if (selectedYear) filters.primary_release_year = selectedYear;
+        if (selectedLanguage) filters.with_original_language = selectedLanguage;
         data = await discoverMovies(filters, nextPage);
       }
       setMovies((prev) => [...prev, ...(data.results || [])]);
@@ -171,14 +180,61 @@ export const HomePage: React.FC = () => {
     <div className="min-h-screen bg-gray-900 pt-8">
       <div className="max-w-7xl mx-auto px-6">
         <SearchBar initialQuery={searchQuery} onSearch={handleSearch} />
+        
+        {/* Trending Section - Only show when no search/filters applied */}
+        {!searchQuery && !selectedGenre && !selectedYear && !selectedLanguage && trendingMovies.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <TrendingUp className="w-8 h-8 text-red-500" />
+              <h2 className="text-3xl font-bold text-white">Trending Today</h2>
+            </div>
+            <div className="relative">
+              <div className="overflow-x-auto pb-4 scrollbar-hide">
+                <div className="flex gap-4" style={{ width: 'max-content' }}>
+                  {trendingMovies.map((movie) => (
+                    <div key={movie.id} className="w-48 flex-shrink-0">
+                      <div
+                        onClick={() => window.location.href = `/movie/${movie.id}`}
+                        className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
+                      >
+                        <div className="relative bg-gray-800 rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl group-hover:shadow-red-500/30 transition-all duration-300">
+                          <div className="aspect-[2/3] overflow-hidden">
+                            <img
+                              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                              alt={movie.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                              <TrendingUp className="w-3 h-3" />
+                              {movie.vote_average.toFixed(1)}
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <h3 className="font-semibold text-white text-sm line-clamp-2 group-hover:text-red-300 transition-colors duration-200">
+                              {movie.title}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <FilterControls
           genres={genres}
           selectedGenre={selectedGenre}
           selectedYear={selectedYear}
           selectedSort={selectedSort}
+          selectedLanguage={selectedLanguage}
           onGenreChange={(g) => updateSearchParams({ genre: g, page: 1 })}
           onYearChange={(y) => updateSearchParams({ year: y, page: 1 })}
           onSortChange={(s) => updateSearchParams({ sort: s, page: 1 })}
+          onLanguageChange={(l) => updateSearchParams({ language: l, page: 1 })}
         />
         
         {searching ? (

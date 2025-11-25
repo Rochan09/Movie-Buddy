@@ -5,9 +5,10 @@ import { MovieCard } from './MovieCard';
 interface MovieGridProps {
   movies: Movie[];
   title?: string;
+  highlightedMovieId?: number | null;
 }
 
-export const MovieGrid: React.FC<MovieGridProps> = ({ movies, title }) => {
+export const MovieGrid: React.FC<MovieGridProps> = ({ movies, title, highlightedMovieId }) => {
   if (movies.length === 0) {
     return (
       <div className="text-center py-16">
@@ -25,7 +26,11 @@ export const MovieGrid: React.FC<MovieGridProps> = ({ movies, title }) => {
       )}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
         {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
+          <MovieCard 
+            key={movie.id} 
+            movie={movie} 
+            isHighlighted={highlightedMovieId === movie.id}
+          />
         ))}
       </div>
     </div>

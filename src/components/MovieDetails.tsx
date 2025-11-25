@@ -3,10 +3,26 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Clock, Calendar, Heart } from 'lucide-react';
 import { isMovieInWatchlist, addMovieToWatchlist, removeMovieFromWatchlist } from '../services/watchlist';
 import { MovieDetails as MovieDetailsType, Movie, WatchProvidersResponse } from '../types/Movie';
-import { fetchMovieDetails, fetchMovieRecommendations, fetchWatchProviders, getImageUrl } from '../services/tmdbApi';
+import { fetchMovieDetails, fetchMovieRecommendations, fetchWatchProviders, getImageUrl, fetchMovieCredits } from '../services/tmdbApi';
 import { Loading } from './Loading';
 import { MovieGrid } from './MovieGrid';
 import { StreamingPlatforms } from './StreamingPlatforms';
+
+interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+}
+
+interface CrewMember {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+  profile_path: string | null;
+}
 
 export const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +30,8 @@ export const MovieDetails: React.FC = () => {
   const [movie, setMovie] = useState<MovieDetailsType | null>(null);
   const [recommendations, setRecommendations] = useState<Movie[]>([]);
   const [watchProviders, setWatchProviders] = useState<WatchProvidersResponse | null>(null);
+  const [cast, setCast] = useState<CastMember[]>([]);
+  const [crew, setCrew] = useState<CrewMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,15 +44,23 @@ export const MovieDetails: React.FC = () => {
       setError(null);
       
       try {
-        const [movieData, recommendationsData, watchProvidersData] = await Promise.all([
+        const [movieData, recommendationsData, watchProvidersData, creditsData] = await Promise.all([
           fetchMovieDetails(id),
           fetchMovieRecommendations(id),
-          fetchWatchProviders(id)
+          fetchWatchProviders(id),
+          fetchMovieCredits(id)
         ]);
         
         setMovie(movieData);
         setRecommendations(recommendationsData.results.slice(0, 12));
         setWatchProviders(watchProvidersData);
+        setCast(creditsData.cast.slice(0, 12));
+        
+        // Get key crew members (Director, Writer, Producer)
+        const keyCrew = creditsData.crew.filter((member: CrewMember) => 
+          ['Director', 'Writer', 'Screenplay', 'Producer', 'Executive Producer'].includes(member.job)
+        );
+        setCrew(keyCrew);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load movie data');
       } finally {
@@ -132,19 +158,44 @@ export const MovieDetails: React.FC = () => {
                   <p className="text-xl text-purple-300 italic mb-6">"{movie.tagline}"</p>
                 )}
 
-                <div className="flex flex-wrap items-center gap-6 mb-6 text-gray-300">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{movie.vote_average.toFixed(1)}</span>
-                    <span className="text-gray-400">({movie.vote_count.toLocaleString()} votes)</span>
+                <div className="flex flex-wrap items-center gap-6 mb-6">
+                  {/* TMDB Rating */}
+                  <div className="flex items-center gap-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
+                    <div className="flex items-center gap-2 text-gray-300">
+                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-white">{movie.vote_average.toFixed(1)}</span>
+                        <span className="text-xs text-gray-400">TMDB ({movie.vote_count.toLocaleString()})</span>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* IMDb Rating */}
+                  {movie.imdb_id && (
+                    <a
+                      href={`https://www.imdb.com/title/${movie.imdb_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 bg-yellow-500/10 px-4 py-2 rounded-lg border border-yellow-500/30 hover:bg-yellow-500/20 transition-colors duration-200"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="bg-yellow-500 text-black font-bold px-2 py-1 rounded text-xs">
+                          IMDb
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-white">View on IMDb</span>
+                          <span className="text-xs text-gray-400">Click for rating</span>
+                        </div>
+                      </div>
+                    </a>
+                  )}
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-gray-300">
                     <Calendar className="w-5 h-5" />
                     <span>{new Date(movie.release_date).getFullYear()}</span>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-gray-300">
                     <Clock className="w-5 h-5" />
                     <span>{movie.runtime} min</span>
                   </div>
@@ -181,6 +232,59 @@ export const MovieDetails: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Cast Section */}
+      {cast.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 mb-16">
+          <h2 className="text-3xl font-bold text-white mb-6">Cast</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {cast.map((member) => (
+              <div 
+                key={member.id}
+                onClick={() => navigate(`/person/${member.id}`)}
+                className="cursor-pointer group"
+              >
+                <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 mb-3 shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300">
+                  {member.profile_path ? (
+                    <img
+                      src={getImageUrl(member.profile_path)}
+                      alt={member.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-700">
+                      <span className="text-6xl">👤</span>
+                    </div>
+                  )}
+                </div>
+                <h3 className="font-semibold text-white text-sm group-hover:text-purple-300 transition-colors">
+                  {member.name}
+                </h3>
+                <p className="text-gray-400 text-xs mt-1">{member.character}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Crew Section */}
+      {crew.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 mb-16">
+          <h2 className="text-3xl font-bold text-white mb-6">Crew</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {crew.map((member, index) => (
+              <div 
+                key={`${member.id}-${member.job}-${index}`}
+                onClick={() => navigate(`/person/${member.id}`)}
+                className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors duration-200"
+              >
+                <h3 className="font-semibold text-white text-sm">{member.name}</h3>
+                <p className="text-purple-400 text-xs mt-1">{member.job}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Streaming Platforms */}
       <div className="max-w-7xl mx-auto px-6 mb-16">

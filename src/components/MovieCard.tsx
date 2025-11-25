@@ -7,9 +7,10 @@ import { getImageUrl } from '../services/tmdbApi';
 interface MovieCardProps {
   movie: Movie;
   showStreamingHint?: boolean;
+  isHighlighted?: boolean;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = ({ movie, showStreamingHint = true }) => {
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, showStreamingHint = true, isHighlighted = false }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -18,10 +19,13 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, showStreamingHint =
 
   return (
     <div
+      id={`movie-${movie.id}`}
       onClick={handleClick}
       className="group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:z-10"
     >
-      <div className="relative bg-gray-800 rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/20 transition-all duration-300">
+      <div className={`relative bg-gray-800 rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/20 transition-all duration-300 ${
+        isHighlighted ? 'ring-4 ring-yellow-400 animate-pulse shadow-2xl shadow-yellow-400/50' : ''
+      }`}>
         <div className="aspect-[2/3] overflow-hidden">
           <img
             src={getImageUrl(movie.poster_path)}

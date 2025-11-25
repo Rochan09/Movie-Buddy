@@ -46,6 +46,7 @@ export interface MovieDetails extends Movie {
   budget: number;
   revenue: number;
   tagline: string;
+  imdb_id?: string;
 }
 
 export interface TMDBResponse {

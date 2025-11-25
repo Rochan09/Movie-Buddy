@@ -8,6 +8,7 @@ interface MobileNavProps {
 
 const navConfig = [
   { href: '/', label: 'Home' },
+  { href: '/mood-picks', label: 'Mood Picks' },
   { href: '/watchlist', label: 'Watchlist' },
   { href: '/about', label: 'About' },
 ];
